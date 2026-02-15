@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>마인크래프트 세상으로의 초대</title>
+
+<style>
+/* 1. 기본 스타일 및 커서 변경 */
+* { box-sizing: border-box; }
+html { 
+    /* 이미지 경로 뒤에 반드시 ', auto'를 붙여야 합니다! */
+    cursor: url('pickaxe_cursor.png'), auto !important; 
+}
+
+/* 버튼에도 별도로 적용해주는 것이 확실합니다 */
+button, .btn {
+    cursor: url('pickaxe_cursor.png'), auto !important;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  overflow: hidden;
+
+  /* 마인크래프트 배경 (minecraft_bg.jpg 파일 필요) */
+  background-image: 
+    linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+    url("minecraft_bg.png");
+  background-size: cover;
+  background-position: center;
+  transition: background-image .8s ease-in-out;
+  font-family: 'Minecraftia', 'Pretendard', system-ui, -apple-system, sans-serif; /* 마인크래프트 폰트 추가 */
+  color: #fff; /* 글자색을 흰색으로 변경 */
+  text-shadow: 2px 2px #333; /* 그림자 추가로 가독성 높임 */
+}
+
+/* 마인크래프트 카드 디자인 */
+.card {
+  width: 100%;
+  max-width: 480px; /* 카드 폭 약간 늘림 */
+  background: rgba(0, 0, 0, 0.7); /* 어두운 투명 배경 */
+  border: 4px solid #6c6c6c; /* 블록 테두리 느낌 */
+  border-radius: 8px; /* 각진 느낌 */
+  padding: 45px 32px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  position: relative;
+  z-index: 10;
+}
+
+h1 {
+  font-size: 26px; /* 폰트 크기 키움 */
+  line-height: 1.6;
+  margin: 0 0 35px;
+  color: #fff;
+  word-break: keep-all;
+  text-shadow: 3px 3px #1a1a1a;
+}
+
+.btn-container {
+  position: relative;
+  width: 280px;
+  height: 60px;
+  margin: 0 auto;
+}
+
+.btn {
+  width: 120px;
+  height: 52px;
+  border: 2px solid #333; /* 블록 테두리 */
+  border-radius: 4px; /* 각진 버튼 */
+  font-size: 18px;
+  font-weight: bold;
+  cursor: url('pickaxe_cursor.png') 16 16, auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: all 0.2s linear; /* 버튼 도망 트랜지션은 JS에서 제어 */
+  text-shadow: 1px 1px #1a1a1a;
+}
+
+.yes {
+  position: absolute;
+  left: 0; top: 0;
+  background: #28a745; /* 마인크래프트 잔디색 */
+  color: #fff;
+  z-index: 20;
+}
+
+.no {
+  position: absolute;
+  right: 0; top: 0;
+  background: #dc3545; /* 마인크래프트 TNT 색 */
+  color: #fff;
+  z-index: 100;
+}
+
+/* No 버튼이 캐지기 시작할 때의 모션 */
+.no.mining {
+    animation: shakeBlock 0.3s infinite alternate; /* 흔들리는 모션 */
+}
+@keyframes shakeBlock {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(5px); }
+}
+
+
+.result {
+  margin-top: 25px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #28a745; /* 잔디색으로 변경 */
+  display: none;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-shadow: 2px 2px #1a1a1a;
+}
+
+/* 파티클 효과 */
+.particle {
+    position: fixed;
+    background-color: #a0a0a0; /* 돌 블록 색 */
+    border-radius: 2px;
+    width: 6px;
+    height: 6px;
+    opacity: 0;
+    pointer-events: none;
+    animation: fadeOutUp 0.8s forwards;
+    z-index: 99;
+}
+@keyframes fadeOutUp {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-50px) scale(0); opacity: 0; }
+}
+
+
+/* 기타 애니메이션 (기존 유지) */
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.heart { /* 마인크래프트 테마와는 안 맞지만, Yes 성공 시 사용 */
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  animation: floatUp 3s ease-in forwards;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0.5); opacity: 1; }
+  100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>
+      당신을 마인크래프트 세상에 초대합니다 ⛏️<br>
+      초대를 수락하시겠습니까?
+    </h1>
+
+    <div class="btn-container" id="btnArea">
+      <button class="btn yes" id="yesBtn" type="button">Yes</button>
+      <button class="btn no" id="noBtn" type="button">No</button>
+    </div>
+
+    <div class="result" id="result">🎉 환영합니다! 모험을 시작해 볼까요? 🎉</div>
+  </div>
+
+<script>
+(function () {
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn  = document.getElementById("noBtn");
+  const result = document.getElementById("result");
+  let mouseX = 0, mouseY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    checkInteraction(); 
+  });
+
+  yesBtn.addEventListener("click", () => {
+    document.body.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("minecraft_accepted_bg.jpg")';
+    result.style.display = "block";
+    noBtn.style.display = 'none';
+    createHearts();
+  });
+
+  // 버튼 트랜지션: 쫀득한 밀당을 위해 Easing 수정
+  noBtn.style.transition = "all 0.5s cubic-bezier(0.19, 1, 0.22, 1)";
+
+  function checkInteraction() {
+    const btnRect = noBtn.getBoundingClientRect();
+    const btnCenterX = btnRect.left + btnRect.width / 2;
+    const btnCenterY = btnRect.top + btnRect.height / 2;
+    const dist = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
+
+    const isInCorner = (btnRect.right > window.innerWidth - 80) && 
+                       (btnRect.bottom > window.innerHeight - 80);
+
+    if (isInCorner) {
+      noBtn.classList.remove('mining');
+      noBtn.style.background = "#fff";
+      noBtn.style.color = "#333";
+      noBtn.textContent = "졌다..";
+      return; 
+    }
+
+    // 1. 감지 거리를 70px로 좁힘 (거의 닿아야 도망감)
+    if (dist < 75) {
+        if (!noBtn.classList.contains('mining')) {
+            noBtn.classList.add('mining');
+            createParticles(btnRect);
+            
+            // 핵심: 즉시 도망가지 않고 0.15초 후에 도망가서 "잡을 수 있을 것 같은" 착각을 줌
+            setTimeout(() => {
+                if (Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY) < 100) {
+                    moveNo();
+                }
+                noBtn.classList.remove('mining');
+            }, 150);
+        }
+    }
+  }
+
+  function moveNo() {
+    noBtn.style.position = "fixed";
+    noBtn.style.right = "auto";
+
+    const btnRect = noBtn.getBoundingClientRect();
+    
+    // 마우스 반대 방향 각도 계산
+    const deltaX = (btnRect.left + btnRect.width/2) - mouseX;
+    const deltaY = (btnRect.top + btnRect.height/2) - mouseY;
+    let angle = Math.atan2(deltaY, deltaX);
+
+    // 살짝 빗나가게 도망가서 더 잡기 어렵게 만듦 (랜덤 각도 추가)
+    angle += (Math.random() - 0.5) * 0.8;
+
+    // 도망 거리를 짧게 설정 (밀당의 핵심)
+    const distance = 70 + Math.random() * 80;
+
+    let newX = btnRect.left + Math.cos(angle) * distance;
+    let newY = btnRect.top + Math.sin(angle) * distance;
+
+    // 화면 밖 방지
+    const pad = 50;
+    const maxX = window.innerWidth - btnRect.width - pad;
+    const maxY = window.innerHeight - btnRect.height - pad;
+
+    newX = Math.max(pad, Math.min(newX, maxX));
+    newY = Math.max(pad, Math.min(newY, maxY));
+
+    noBtn.style.left = newX + "px";
+    noBtn.style.top  = newY + "px";
+    
+    // 깐족거리는 회전 (각도 줄임)
+    const rotate = (Math.random() - 0.5) * 30;
+    noBtn.style.transform = `rotate(${rotate}deg)`;
+  }
+
+  function createParticles(rect) {
+      for (let i = 0; i < 6; i++) {
+          const particle = document.createElement('div');
+          particle.classList.add('particle');
+          particle.style.background = "#888";
+          particle.style.left = `${rect.left + Math.random() * rect.width}px`;
+          particle.style.top = `${rect.top + Math.random() * rect.height}px`;
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 600);
+      }
+  }
+
+  // 치트키 상황이 아닐 때 클릭하면 살짝 더 멀리 도망
+  noBtn.addEventListener("mousedown", (e) => {
+    const btnRect = noBtn.getBoundingClientRect();
+    const isInCorner = (btnRect.right > window.innerWidth - 80) && (btnRect.bottom > window.innerHeight - 80);
+    if (!isInCorner) {
+        e.preventDefault();
+        moveNo();
+    }
+  });
+
+  function createHearts() {
+    const inter = setInterval(() => {
+      const h = document.createElement("div");
+      h.className = "heart";
+      h.textContent = ["💎","🥇","💚","❤️"][Math.floor(Math.random()*4)];
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.top = "100vh";
+      h.style.fontSize = (Math.random() * 20 + 30) + "px";
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 4000);
+    }, 100);
+    setTimeout(() => clearInterval(inter), 3000);
+  }
+})();
+</script>
+</body>
+</html>
